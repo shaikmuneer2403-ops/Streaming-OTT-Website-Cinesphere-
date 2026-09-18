@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineSphere — Cinema Reimagined</title>
+  <link rel="stylesheet" href="/frontend/css/global.css">
+  <link rel="stylesheet" href="/frontend/css/animations.css">
+  <link rel="stylesheet" href="/frontend/css/responsive.css">
+</head>
+<body style="background: radial-gradient(circle at top right, #182032 0%, #0a0d14 70%); min-height: 100vh; display: flex; flex-direction: column;">
+  <header style="padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border);">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #fff;">CINE<span style="color: var(--accent);">SPHERE</span></span>
+      <span class="badge badge-premium">ULTRA HD</span>
+    </div>
+    <div style="display: flex; gap: 16px;">
+      <a href="/frontend/login.html" class="btn-secondary">Sign In</a>
+      <a href="/frontend/register.html" class="btn-primary">Start Free Trial</a>
+    </div>
+  </header>
+
+  <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 24px;">
+    <span class="badge badge-hd" style="margin-bottom: 16px;">STREAMING 4K HDR & DOLBY ATMOS</span>
+    <h1 style="font-size: clamp(36px, 6vw, 64px); font-weight: 900; line-height: 1.1; max-width: 900px; margin-bottom: 20px;">
+      Infinite Cinema. Zero Boundaries.
+    </h1>
+    <p style="font-size: 18px; color: var(--text-secondary); max-width: 600px; margin-bottom: 36px;">
+      Stream blockbuster cinema, exclusive sci-fi epics, and award-winning originals with seamless resume across all your devices.
+    </p>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+      <a href="/" class="btn-primary" style="font-size: 16px; padding: 14px 32px;">Launch Full Interactive Platform</a>
+      <a href="/frontend/browse.html" class="btn-secondary" style="font-size: 16px; padding: 14px 28px;">Browse Catalog</a>
+      <a href="/frontend/admin/dashboard.html" class="btn-secondary" style="font-size: 16px; padding: 14px 28px; border-color: var(--accent-gold);">Admin Studio</a>
+    </div>
+  </main>
+
+  <footer style="padding: 24px 48px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; color: var(--text-muted); font-size: 13px;">
+    <span>&copy; 2026 CineSphere Streaming Platform. All rights reserved.</span>
+    <span>Engineered with Node.js, Express, MongoDB Mongoose & Socket.IO</span>
+  </footer>
+</body>
+</html>

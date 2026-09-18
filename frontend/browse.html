@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Movies & Series — CineSphere</title>
+  <link rel="stylesheet" href="/frontend/css/global.css">
+  <link rel="stylesheet" href="/frontend/css/animations.css">
+  <link rel="stylesheet" href="/frontend/css/responsive.css">
+  <style>
+    .hero-banner {
+      position: relative;
+      height: 75vh;
+      min-height: 500px;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 48px 60px;
+      background-size: cover;
+      background-position: center 25%;
+    }
+    .hero-gradient-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, #0a0d14 10%, rgba(10, 13, 20, 0.4) 60%, rgba(10, 13, 20, 0.7) 100%),
+                  linear-gradient(to right, #0a0d14 20%, transparent 70%);
+    }
+    .row-scroll-container {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 12px 0 24px;
+      scroll-behavior: smooth;
+    }
+    .row-scroll-container::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Global Navigation Bar -->
+  <header style="position: sticky; top: 0; z-index: 100; padding: 16px 48px; display: flex; align-items: center; justify-content: space-between; background: rgba(10, 13, 20, 0.9); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border);">
+    <div style="display: flex; align-items: center; gap: 32px;">
+      <a href="/frontend/browse.html" style="font-size: 24px; font-weight: 800; color: #fff;">CINE<span style="color: var(--accent);">SPHERE</span></a>
+      <nav style="display: flex; gap: 20px; font-size: 14px; font-weight: 500;">
+        <a href="/frontend/browse.html" style="color: #fff;">Home</a>
+        <a href="#movies" style="color: var(--text-secondary);">Movies</a>
+        <a href="#series" style="color: var(--text-secondary);">Series</a>
+        <a href="/frontend/favorites.html" style="color: var(--text-secondary);">My List</a>
+        <a href="/frontend/history.html" style="color: var(--text-secondary);">History</a>
+        <a href="/frontend/subscription.html" style="color: var(--text-secondary);">Plans</a>
+        <a href="/frontend/admin/dashboard.html" id="nav-admin" style="color: var(--accent-gold); display: none;">Admin Panel</a>
+      </nav>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="/frontend/search.html" style="color: var(--text-secondary);">🔍 Search</a>
+      <a href="/frontend/notifications.html" style="color: var(--text-secondary);">🔔 Alerts</a>
+      <div id="user-menu" style="display: flex; align-items: center; gap: 12px;">
+        <a href="/frontend/login.html" class="btn-primary" style="padding: 6px 14px; font-size: 13px;">Sign In</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Feature Movie -->
+  <section id="hero" class="hero-banner" style="background-image: url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=1920&auto=format&fit=crop&q=80');">
+    <div class="hero-gradient-overlay"></div>
+    <div style="position: relative; z-index: 10; max-width: 650px;">
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
+        <span class="badge badge-rating">★ 8.9</span>
+        <span class="badge badge-hd">4K ULTRA HD</span>
+        <span style="color: var(--text-secondary); font-size: 13px;">2024 • 2h 28m • Sci-Fi / Adventure</span>
+      </div>
+      <h1 id="hero-title" style="font-size: clamp(32px, 5vw, 54px); font-weight: 900; line-height: 1.1; margin-bottom: 14px;">
+        Cosmic Odyssey: Beyond Horizon
+      </h1>
+      <p id="hero-desc" style="color: var(--text-secondary); font-size: 16px; margin-bottom: 24px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+        When an enigmatic hyperspace anomaly opens near Saturn's rings, a seasoned deep-space navigator and a rogue astrobiologist embark on humanity's most perilous journey across uncharted galactic frontiers.
+      </p>
+      <div style="display: flex; gap: 14px;">
+        <a id="hero-watch-btn" href="/frontend/watch.html?id=mov-1" class="btn-primary" style="padding: 12px 28px; font-size: 15px;">
+          ▶ Watch Now
+        </a>
+        <button id="hero-list-btn" class="btn-secondary" style="padding: 12px 20px;">
+          + Add to My List
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Rows -->
+  <main style="padding: 32px 48px; display: flex; flex-direction: column; gap: 40px;">
+    <!-- Continue Watching Row -->
+    <section id="row-continue-watching" style="display: none;">
+      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 14px;">Continue Watching</h3>
+      <div id="continue-watching-cards" class="row-scroll-container"></div>
+    </section>
+
+    <!-- Trending Now -->
+    <section>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 20px; font-weight: 700;">Trending Now</h3>
+      </div>
+      <div id="trending-cards" class="row-scroll-container"></div>
+    </section>
+
+    <!-- Sci-Fi & Adventure -->
+    <section>
+      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 14px;">Sci-Fi & Cyberpunk</h3>
+      <div id="scifi-cards" class="row-scroll-container"></div>
+    </section>
+
+    <!-- Action & Thriller -->
+    <section>
+      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 14px;">Action & Adrenaline</h3>
+      <div id="action-cards" class="row-scroll-container"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { api, getCurrentUser, clearSession } from '/frontend/js/api.js';
+
+    // Render User Header
+    const user = getCurrentUser();
+    const userMenu = document.getElementById('user-menu');
+    if (user) {
+      if (user.role === 'admin') {
+        document.getElementById('nav-admin').style.display = 'inline';
+      }
+      userMenu.innerHTML = `
+        <a href="/frontend/profile.html" style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600;">
+          <img src="${user.profileImage}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent);" alt="${user.name}">
+          <span>${user.name.split(' ')[0]}</span>
+        </a>
+        <button id="btn-logout" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;">Sign Out</button>
+      `;
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        clearSession();
+        window.location.reload();
+      });
+    }
+
+    // Load Movies
+    async function loadContent() {
+      try {
+        const data = await api.getMovies();
+        const movies = data.movies || [];
+
+        function renderMovieCard(m) {
+          return `
+            <div class="movie-card" style="flex: 0 0 200px;">
+              <img src="${m.poster}" class="poster-img" alt="${m.title}" loading="lazy">
+              <div class="card-overlay">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span class="badge badge-rating">★ ${m.rating}</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);">${m.releaseYear}</span>
+                </div>
+                <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px;">${m.genres.slice(0, 2).join(' • ')}</div>
+                <div style="display: flex; gap: 6px;">
+                  <a href="/frontend/watch.html?id=${m._id}" class="btn-primary" style="font-size: 11px; padding: 4px 10px; flex: 1; justify-content: center;">▶ Play</a>
+                  <a href="/frontend/movie.html?id=${m._id}" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;">ℹ</a>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // Render Trending
+        document.getElementById('trending-cards').innerHTML = movies.map(renderMovieCard).join('');
+
+        // Render Sci-Fi
+        const scifi = movies.filter(m => m.genres.some(g => g.toLowerCase().includes('sci-fi')));
+        document.getElementById('scifi-cards').innerHTML = scifi.map(renderMovieCard).join('');
+
+        // Render Action
+        const action = movies.filter(m => m.genres.some(g => g.toLowerCase().includes('action')));
+        document.getElementById('action-cards').innerHTML = action.map(renderMovieCard).join('');
+
+        // Load Continue Watching if logged in
+        if (user) {
+          try {
+            const histRes = await api.getHistory();
+            if (histRes.history && histRes.history.length > 0) {
+              document.getElementById('row-continue-watching').style.display = 'block';
+              document.getElementById('continue-watching-cards').innerHTML = histRes.history.map(h => {
+                const item = h.content;
+                return `
+                  <div class="movie-card" style="flex: 0 0 240px;">
+                    <img src="${item.backdrop || item.poster}" class="poster-img" style="aspect-ratio: 16/9;" alt="${item.title}">
+                    <div style="height: 4px; background: rgba(255,255,255,0.2); width: 100%;">
+                      <div style="height: 100%; width: ${h.completionPercentage}%; background: var(--accent);"></div>
+                    </div>
+                    <div class="card-overlay">
+                      <div style="font-weight: 700; font-size: 13px;">${item.title}</div>
+                      <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">Resume at ${Math.floor(h.progress / 60)}m ${h.progress % 60}s</div>
+                      <a href="/frontend/watch.html?id=${item._id}&resume=${h.progress}" class="btn-primary" style="font-size: 11px; padding: 4px 10px;">▶ Resume</a>
+                    </div>
+                  </div>
+                `;
+              }).join('');
+            }
+          } catch (e) {
+            console.warn('Could not load history:', e);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load content:', err);
+      }
+    }
+
+    loadContent();
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+/* Responsive Rules */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .auth-card {
+    padding: 24px;
+  }
+  .player-controls-overlay {
+    padding: 12px;
+  }
+  .movie-card:hover {
+    transform: none; /* Avoid sticky hover on mobile */
+  }
+}

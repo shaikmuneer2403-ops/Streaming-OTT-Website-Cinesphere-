@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — CineSphere</title>
+  <link rel="stylesheet" href="/frontend/css/global.css">
+  <link rel="stylesheet" href="/frontend/css/auth.css">
+  <link rel="stylesheet" href="/frontend/css/animations.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card animate-fade-in">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h2 style="font-size: 24px; font-weight: 800;">Welcome Back</h2>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Sign in to resume watching where you left off</p>
+      </div>
+
+      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 24px; font-size: 13px;">
+        <div style="font-weight: 600; color: var(--accent-gold); margin-bottom: 6px;">⚡ Quick Demo Accounts:</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="btn-demo-user" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">Demo User</button>
+          <button id="btn-demo-admin" class="btn-secondary" style="font-size: 12px; padding: 6px 12px; border-color: var(--accent-gold);">Demo Admin</button>
+        </div>
+      </div>
+
+      <form id="login-form">
+        <div class="auth-form-group">
+          <label class="auth-label">Email Address</label>
+          <input type="email" id="email" class="auth-input" placeholder="name@example.com" required>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Password</label>
+          <input type="password" id="password" class="auth-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" id="btn-submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
+          Sign In
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-secondary);">
+        New to CineSphere? <a href="/frontend/register.html" style="color: #fff; font-weight: 600;">Sign up now</a>
+      </div>
+      <div style="text-align: center; margin-top: 12px;">
+        <a href="/" style="color: var(--text-muted); font-size: 13px;">← Return to Main Web App</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api, saveSession } from '/frontend/js/api.js';
+
+    const form = document.getElementById('login-form');
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+
+    document.getElementById('btn-demo-user').addEventListener('click', () => {
+      emailInput.value = 'user@cinesphere.tv';
+      passInput.value = 'UserPassword123!';
+    });
+
+    document.getElementById('btn-demo-admin').addEventListener('click', () => {
+      emailInput.value = 'admin@cinesphere.tv';
+      passInput.value = 'AdminPassword123!';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      btn.innerText = 'Verifying...';
+      btn.disabled = true;
+
+      try {
+        const res = await api.login({
+          email: emailInput.value,
+          password: passInput.value
+        });
+        saveSession(res.token, res.user);
+        if (res.user.role === 'admin') {
+          window.location.href = '/frontend/admin/dashboard.html';
+        } else {
+          window.location.href = '/frontend/browse.html';
+        }
+      } catch (err) {
+        alert(err.message || 'Login failed');
+        btn.innerText = 'Sign In';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

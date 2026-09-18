@@ -1,0 +1,8 @@
+{
+  "name": "CineSphere OTT Platform",
+  "description": "Production-grade OTT streaming platform with cinematic UI, video player, JWT auth, watch history, real-time Socket.IO, subscriptions, and admin control suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

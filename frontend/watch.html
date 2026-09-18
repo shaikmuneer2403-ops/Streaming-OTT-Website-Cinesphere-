@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watching — CineSphere Cinema Player</title>
+  <link rel="stylesheet" href="/frontend/css/global.css">
+  <link rel="stylesheet" href="/frontend/css/player.css">
+  <link rel="stylesheet" href="/frontend/css/animations.css">
+</head>
+<body style="background: #000; height: 100vh; overflow: hidden; margin: 0;">
+  <div class="video-player-container" id="player-container">
+    <video id="video-element" class="video-element" playsinline>
+      <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+    </video>
+
+    <!-- Resume from XX:XX Toast -->
+    <div id="resume-toast" class="resume-notification-toast" style="display: none;">
+      <span>⏱ Continue from <strong id="resume-time-str">12:30</strong>?</span>
+      <button id="btn-resume-accept" class="btn-primary" style="padding: 4px 12px; font-size: 12px;">Resume</button>
+      <button id="btn-resume-dismiss" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">Start Over</button>
+    </div>
+
+    <!-- Interactive Overlay -->
+    <div class="player-controls-overlay" id="controls-overlay">
+      <!-- Top Bar -->
+      <div class="player-top-bar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <a href="/frontend/browse.html" class="btn-secondary" style="border-radius: 50%; width: 40px; height: 40px; padding: 0; justify-content: center;">←</a>
+          <div>
+            <h2 id="player-title" style="font-size: 18px; font-weight: 700; margin: 0;">Movie Title</h2>
+            <span id="player-sub" style="font-size: 13px; color: var(--text-secondary);">4K Ultra HD • Dolby Atmos</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button id="btn-skip-intro" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;">Skip Intro (+10s)</button>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="player-bottom-bar">
+        <!-- Progress Bar -->
+        <div class="progress-bar-container" id="progress-container">
+          <div class="progress-filled" id="progress-fill" style="width: 0%;"></div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; color: #fff;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <button id="btn-play-pause" class="btn-primary" style="padding: 8px 16px;">▶ Play</button>
+            <span id="time-display" style="font-size: 13px; font-family: monospace;">00:00 / 00:00</span>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" style="width: 80px; accent-color: var(--accent);">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <select id="speed-select" style="background: var(--surface); color: #fff; border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px;">
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1.0x (Normal)</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="2">2.0x</option>
+            </select>
+            <button id="btn-fullscreen" class="btn-secondary" style="padding: 6px 12px; font-size: 13px;">⛶ Fullscreen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api, getCurrentUser } from '/frontend/js/api.js';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('id') || 'mov-1';
+    const resumeParam = urlParams.get('resume');
+
+    const video = document.getElementById('video-element');
+    const playPauseBtn = document.getElementById('btn-play-pause');
+    const progressFill = document.getElementById('progress-fill');
+    const progressContainer = document.getElementById('progress-container');
+    const timeDisplay = document.getElementById('time-display');
+    const volumeSlider = document.getElementById('volume-slider');
+    const speedSelect = document.getElementById('speed-select');
+    const fullscreenBtn = document.getElementById('btn-fullscreen');
+    const resumeToast = document.getElementById('resume-toast');
+
+    let movieData = null;
+    let savedProgress = resumeParam ? Number(resumeParam) : 0;
+
+    // Load movie metadata
+    async function init() {
+      try {
+        const res = await api.getMovieById(movieId);
+        movieData = res.movie;
+        document.getElementById('player-title').innerText = movieData.title;
+        video.src = movieData.videoUrl;
+
+        // Check if user has saved history
+        const user = getCurrentUser();
+        if (user && !resumeParam) {
+          const histRes = await api.getHistory();
+          const match = histRes.history?.find(h => h.content?._id === movieId || h.content === movieId);
+          if (match && match.progress > 15) {
+            savedProgress = match.progress;
+            const mins = Math.floor(savedProgress / 60);
+            const secs = savedProgress % 60;
+            document.getElementById('resume-time-str').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            resumeToast.style.display = 'flex';
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById('btn-resume-accept').addEventListener('click', () => {
+      video.currentTime = savedProgress;
+      resumeToast.style.display = 'none';
+      video.play();
+    });
+
+    document.getElementById('btn-resume-dismiss').addEventListener('click', () => {
+      resumeToast.style.display = 'none';
+      video.currentTime = 0;
+      video.play();
+    });
+
+    playPauseBtn.addEventListener('click', () => {
+      if (video.paused) {
+        video.play();
+        playPauseBtn.innerText = '⏸ Pause';
+      } else {
+        video.pause();
+        playPauseBtn.innerText = '▶ Play';
+      }
+    });
+
+    video.addEventListener('timeupdate', () => {
+      if (!video.duration) return;
+      const pct = (video.currentTime / video.duration) * 100;
+      progressFill.style.width = `${pct}%`;
+
+      const formatTime = (s) => {
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+      };
+
+      timeDisplay.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+      const rect = progressContainer.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      video.currentTime = pos * video.duration;
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+      video.volume = e.target.value;
+    });
+
+    speedSelect.addEventListener('change', (e) => {
+      video.playbackRate = Number(e.target.value);
+    });
+
+    document.getElementById('btn-skip-intro').addEventListener('click', () => {
+      video.currentTime = Math.min(video.duration, video.currentTime + 10);
+    });
+
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.getElementById('player-container').requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+
+    // Auto-save watch position periodically to backend
+    setInterval(async () => {
+      const user = getCurrentUser();
+      if (user && video.currentTime > 5 && video.duration > 0) {
+        try {
+          await api.saveProgress({
+            contentId: movieId,
+            contentType: 'movie',
+            progress: video.currentTime,
+            duration: video.duration
+          });
+        } catch (e) {
+          // ignore background save errors
+        }
+      }
+    }, 5000);
+
+    init();
+  </script>
+</body>
+</html>

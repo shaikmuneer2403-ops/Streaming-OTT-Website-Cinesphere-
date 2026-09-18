@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — CineSphere</title>
+  <link rel="stylesheet" href="/frontend/css/global.css">
+  <link rel="stylesheet" href="/frontend/css/auth.css">
+  <link rel="stylesheet" href="/frontend/css/animations.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card animate-fade-in">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h2 style="font-size: 24px; font-weight: 800;">Join CineSphere</h2>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Unlimited movies, series, and personalized watch lists</p>
+      </div>
+
+      <form id="register-form">
+        <div class="auth-form-group">
+          <label class="auth-label">Your Name</label>
+          <input type="text" id="name" class="auth-input" placeholder="e.g. Maya Lin" required>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Email Address</label>
+          <input type="email" id="email" class="auth-input" placeholder="name@example.com" required>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Password (min 6 characters)</label>
+          <input type="password" id="password" class="auth-input" placeholder="••••••••" minlength="6" required>
+        </div>
+        <button type="submit" id="btn-submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
+          Create Free Account
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-secondary);">
+        Already have an account? <a href="/frontend/login.html" style="color: #fff; font-weight: 600;">Sign in here</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api, saveSession } from '/frontend/js/api.js';
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      btn.innerText = 'Creating Account...';
+      btn.disabled = true;
+
+      try {
+        const res = await api.register({
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        });
+        saveSession(res.token, res.user);
+        window.location.href = '/frontend/browse.html';
+      } catch (err) {
+        alert(err.message || 'Registration failed');
+        btn.innerText = 'Create Free Account';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

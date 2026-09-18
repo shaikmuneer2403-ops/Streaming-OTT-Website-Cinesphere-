@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — CineSphere Operations</title>
+  <link rel="stylesheet" href="/frontend/css/global.css">
+  <link rel="stylesheet" href="/frontend/css/admin.css">
+  <link rel="stylesheet" href="/frontend/css/animations.css">
+  <link rel="stylesheet" href="/frontend/css/responsive.css">
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+      <div>
+        <a href="/frontend/browse.html" style="font-size: 22px; font-weight: 800; color: #fff;">CINE<span style="color: var(--accent);">SPHERE</span></a>
+        <div style="font-size: 11px; color: var(--accent-gold); font-weight: 700; margin-top: 4px;">MANAGEMENT CONSOLE</div>
+      </div>
+
+      <nav style="display: flex; flex-direction: column; gap: 8px;">
+        <a href="/frontend/admin/dashboard.html" style="background: var(--surface-hover); color: #fff; padding: 10px 14px; border-radius: var(--radius-sm); font-weight: 600;">📊 Overview</a>
+        <a href="/frontend/admin/users.html" style="color: var(--text-secondary); padding: 10px 14px;">👥 Users</a>
+        <a href="/frontend/browse.html" style="color: var(--text-secondary); padding: 10px 14px;">🎬 Browse App</a>
+      </nav>
+
+      <div style="margin-top: auto; border-top: 1px solid var(--border); pt: 16px;">
+        <button id="btn-admin-logout" class="btn-secondary" style="width: 100%; justify-content: center; font-size: 13px;">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+          <h1 style="font-size: 28px; font-weight: 800;">System Overview</h1>
+          <p style="color: var(--text-secondary); font-size: 14px;">Real-time infrastructure and user engagement telemetry</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 16px; border-radius: 20px; color: #10b981; font-size: 13px; font-weight: 600;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+          <span id="socket-status">Socket.IO Connected</span>
+        </div>
+      </header>
+
+      <!-- Stat Cards -->
+      <div class="admin-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total Users</span>
+          <div class="stat-value" id="stat-users">-</div>
+          <span style="font-size: 12px; color: #10b981;">↑ Active community</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Movies</span>
+          <div class="stat-value" id="stat-movies">-</div>
+          <span style="font-size: 12px; color: var(--text-secondary);">4K Ultra HD ready</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Watch Hours</span>
+          <div class="stat-value" id="stat-hours">-</div>
+          <span style="font-size: 12px; color: var(--accent-gold);">Streaming engagement</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Comments & Discussions</span>
+          <div class="stat-value" id="stat-comments">-</div>
+          <span style="font-size: 12px; color: var(--text-secondary);">Moderated</span>
+        </div>
+      </div>
+
+      <!-- Real-Time Active Users Live Monitoring Panel -->
+      <section style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700;">📡 Real-Time Live User Monitoring</h3>
+            <p style="font-size: 13px; color: var(--text-secondary);">Live active viewers connected via Socket.IO</p>
+          </div>
+          <span id="active-viewer-count" class="badge badge-rating" style="padding: 6px 12px; font-size: 13px;">0 Active Viewers</span>
+        </div>
+
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Status</th>
+              <th>Currently Watching</th>
+              <th>Connection Time</th>
+            </tr>
+          </thead>
+          <tbody id="live-users-tbody">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">Waiting for active streaming sessions...</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module">
+    import { api, getCurrentUser, clearSession } from '/frontend/js/api.js';
+
+    // Auth Guard
+    const user = getCurrentUser();
+    if (!user || user.role !== 'admin') {
+      window.location.href = '/frontend/login.html';
+      throw new Error('Access restricted to administrators only.');
+    }
+
+    document.getElementById('btn-admin-logout').addEventListener('click', () => {
+      clearSession();
+      window.location.href = '/frontend/login.html';
+    });
+
+    async function loadStats() {
+      try {
+        const res = await api.getAnalytics();
+        if (res.success) {
+          document.getElementById('stat-users').innerText = res.stats.totalUsers;
+          document.getElementById('stat-movies').innerText = res.stats.totalMovies;
+          document.getElementById('stat-hours').innerText = `${res.stats.totalWatchHours} hrs`;
+          document.getElementById('stat-comments').innerText = res.stats.totalComments;
+        }
+      } catch (err) {
+        console.error('Failed to load analytics:', err);
+      }
+    }
+
+    // Connect Socket.IO
+    try {
+      const socket = io();
+      socket.emit('admin_join');
+
+      socket.on('live_monitoring_update', (data) => {
+        document.getElementById('active-viewer-count').innerText = `${data.count} Active Viewers`;
+        const tbody = document.getElementById('live-users-tbody');
+        if (!data.viewers || data.viewers.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">No viewers connected currently</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.viewers.map(v => `
+          <tr>
+            <td style="display: flex; align-items: center; gap: 10px;">
+              <img src="${v.profileImage || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + v.name}" style="width: 28px; height: 28px; border-radius: 50%;" alt="">
+              <div>
+                <div style="font-weight: 600; font-size: 14px;">${v.name}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">${v.email}</div>
+              </div>
+            </td>
+            <td><span class="badge" style="background: #10b981; color: #000;">Online</span></td>
+            <td>${v.watching ? `🎬 ${v.watching}` : 'Browsing Catalog'}</td>
+            <td style="font-size: 13px; color: var(--text-secondary);">${new Date(v.connectedAt).toLocaleTimeString()}</td>
+          </tr>
+        `).join('');
+      });
+    } catch (e) {
+      console.warn('Socket connection error:', e);
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>
